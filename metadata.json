@@ -1,0 +1,5 @@
+{
+  "name": "Zen Gomoku AI",
+  "description": "A beautiful, responsive Five-in-a-Row game featuring both a fast local AI and a strategic Gemini-powered Grandmaster opponent.",
+  "requestFramePermissions": []
+}
