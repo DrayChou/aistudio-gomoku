@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [currentPlayer, setCurrentPlayer] = useState<Player>(Player.Black);
   const [lastMove, setLastMove] = useState<Move | null>(null);
   const [winningLine, setWinningLine] = useState<{x:number, y:number}[] | null>(null);
+  const [winner, setWinner] = useState<Player | null>(null);
   
   // Settings
   const [difficulty, setDifficulty] = useState<AIDifficulty>(AIDifficulty.LocalHard);
@@ -41,7 +42,7 @@ const App: React.FC = () => {
         grid: grid.map(row => [...row]),
         moves: [], // We only need grid snapshot mostly for this simple implementation
         status,
-        winner: null,
+        winner,
         currentPlayer
       }
     ]);
@@ -55,6 +56,7 @@ const App: React.FC = () => {
     // Check Win
     if (checkWin(newGrid, { x, y }, player)) {
       setStatus(GameStatus.Won);
+      setWinner(player);
       // In a real implementation we would calculate the exact winning line coords for highlighting
       // For now we highlight the last move specifically
       setWinningLine([{x, y}]); // Placeholder for visual effect trigger
@@ -70,7 +72,7 @@ const App: React.FC = () => {
 
     // Next Turn
     setCurrentPlayer(player === Player.Black ? Player.White : Player.Black);
-  }, [grid, history, status, currentPlayer]);
+  }, [grid, history, status, currentPlayer, winner]);
 
   // AI Logic Trigger
   useEffect(() => {
@@ -137,6 +139,7 @@ const App: React.FC = () => {
     setGrid(prevBoardState.grid);
     setCurrentPlayer(prevBoardState.currentPlayer);
     setStatus(GameStatus.Playing);
+    setWinner(null);
     setWinningLine(null);
     setLastMove(null); // Simplified, ideally retrieve from history
     setHistory(prev => prev.slice(0, prev.length - stepsBack));
@@ -148,6 +151,7 @@ const App: React.FC = () => {
     setHistory([]);
     setStatus(GameStatus.Playing);
     setCurrentPlayer(Player.Black);
+    setWinner(null);
     setLastMove(null);
     setWinningLine(null);
     setGeminiAnalysis(null);
@@ -168,11 +172,11 @@ const App: React.FC = () => {
       />
       
       <div className="flex-1 relative overflow-hidden flex items-center justify-center p-4">
-        {status === GameStatus.Won && (
+        {status === GameStatus.Won && winner && (
            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in">
              <div className="bg-white p-8 rounded-2xl shadow-2xl transform scale-110 text-center">
                 <h2 className="text-4xl font-black text-stone-800 mb-2">
-                    {currentPlayer === Player.Black ? 'White Wins!' : 'Black Wins!'}
+                    {winner === Player.Black ? 'Black Wins!' : 'White Wins!'}
                 </h2>
                 <p className="text-stone-500 mb-6">Game Over</p>
                 <button 
